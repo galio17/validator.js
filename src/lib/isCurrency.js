@@ -4,6 +4,14 @@ import assertString from './util/assertString';
 function currencyRegex(options) {
   let decimal_digits = `\\d{${options.digits_after_decimal[0]}}`;
   options.digits_after_decimal.forEach((digit, index) => { if (index !== 0) decimal_digits = `${decimal_digits}|\\d{${digit}}`; });
+  let space_separators = options.space_separators.reduce((separator_characters, separator) => {
+    if (separator instanceof RegExp) {
+      separator = separator.toString().replace(/(^\/)|(\/$)/g, '');
+    }
+    return separator_characters + separator;
+  }, '');
+  space_separators = `[${space_separators}]`;
+
 
   const symbol =
     `(${options.symbol.replace(/\W/, m => `\\${m}`)})${(options.require_symbol ? '' : '?')}`,
@@ -27,11 +35,11 @@ function currencyRegex(options) {
 
   // South African Rand, for example, uses R 123 (space) and R-123 (no space)
   if (options.allow_negative_sign_placeholder) {
-    pattern = `( (?!\\-))?${pattern}`;
+    pattern = `(${space_separators}(?!\\-))?${pattern}`;
   } else if (options.allow_space_after_symbol) {
-    pattern = ` ?${pattern}`;
+    pattern = `${space_separators}?${pattern}`;
   } else if (options.allow_space_after_digits) {
-    pattern += '( (?!$))?';
+    pattern += `(${space_separators}(?!$))?`;
   }
 
   if (options.symbol_after_digits) {
@@ -70,6 +78,7 @@ const default_currency_options = {
   require_decimal: false,
   digits_after_decimal: [2],
   allow_space_after_digits: false,
+  space_separators: [' ', /\u00a0/],
 };
 
 export default function isCurrency(str, options) {
