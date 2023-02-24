@@ -10748,16 +10748,14 @@ describe('Validators', () => {
     //  R$ ##,###.## (pt_BR)
     test({
       validator: 'isCurrency',
-      args: [
-        {
-          symbol: 'R$',
-          require_symbol: true,
-          allow_space_after_symbol: true,
-          symbol_after_digits: false,
-          thousands_separator: '.',
-          decimal_separator: ',',
-        },
-      ],
+      args: [{
+        symbol: 'R$',
+        require_symbol: true,
+        allow_space_after_symbol: true,
+        symbol_after_digits: false,
+        thousands_separator: '.',
+        decimal_separator: ',',
+      }],
       valid: [
         'R$ 1.400,00',
         'R$ 400,00',
@@ -10765,6 +10763,61 @@ describe('Validators', () => {
       invalid: [
         '$ 1.400,00',
         '$R 1.400,00',
+      ],
+    });
+
+    // R${space_characters}#.###,##
+    test({
+      validator: 'isCurrency',
+      args: [
+        {
+          symbol: 'R$',
+          allow_space_after_symbol: true,
+          space_separators: [' ', '_', '\\u00a0'],
+          thousands_separator: '.',
+          decimal_separator: ',',
+        },
+      ],
+      valid: [
+        'R$ 1.000,00',
+        'R$_1.000,00',
+        'R$\u00a01.000,00',
+        '1.000,00',
+        (1000).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      ],
+      invalid: [
+        'R$\n1.000,00',
+        'R$\t1.000,00',
+        'R$\r1.000,00',
+        '\u00a01.000,00',
+        'R$  1.000,00',
+        'R$ \u00a01.000,00',
+        'R$\u00a0 1.000,00',
+      ],
+    });
+
+    // # ###,##{space_characters}€
+    test({
+      validator: 'isCurrency',
+      args: [{
+        symbol: '€',
+        allow_space_after_digits: true,
+        symbol_after_digits: true,
+        thousands_separator: ' ',
+        decimal_separator: ',',
+        space_separators: ['-', '/', /\\/],
+      }],
+      valid: [
+        '5 470,00/€',
+        '5 470,00\\€',
+        '5 470,00-€',
+        '5 470,00',
+      ],
+      invalid: [
+        '5 470,00-',
+        '5 470,00/',
+        '5 470,00\\',
+        '5 470,00 €',
       ],
     });
   });
