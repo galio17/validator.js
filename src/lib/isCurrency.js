@@ -50,7 +50,7 @@ function currencyRegex(options) {
 
   // ensure there's a dollar and/or decimal amount, and that
   // it doesn't start with a space or a negative sign followed by a space
-  return new RegExp(`^(?!-? )(?=.*\\d)${pattern}$`);
+  return new RegExp(`^(?!-?\\s)(?=.*\\d)${pattern}$`);
 }
 
 
